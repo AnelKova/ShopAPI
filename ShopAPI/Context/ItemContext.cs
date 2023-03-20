@@ -17,7 +17,7 @@ namespace ShopAPI.Context
         {
             modelBuilder.Entity<User>().ToTable("users");
             modelBuilder.Entity<Product>().ToTable("products");
-        
+
 
         }
 

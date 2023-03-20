@@ -12,7 +12,7 @@ namespace ShopAPI.Models
         public decimal Price { get; set; }
         public string Category { get; set; }
         public string Description { get; set; }
-       
-        public IFormFile Images { get; set; }
+
+        public string? ImgPath { get; set; }
     }
 }

@@ -103,10 +103,10 @@ namespace ShopAPI.Controllers
         {
             StringBuilder sb = new StringBuilder();
             if (password.Length < 8)
-                sb.Append("Minimum password should be 8+" + Environment.NewLine);
-            if ((Regex.IsMatch(password, "[a-z]") && Regex.IsMatch(password, "[A-Z]") && Regex.IsMatch(password, "[0-9]")))
+                sb.Append("Minimum password length should be 8+" + Environment.NewLine);
+            if (!(Regex.IsMatch(password, "[a-z]") && Regex.IsMatch(password, "[A-Z]") && Regex.IsMatch(password, "[0-9]")))
                 sb.Append("Password should be Alphanumeric" + Environment.NewLine);
-            if (!Regex.IsMatch(password, "[<,>,@,/,!,#,%,&,),€,(,?]"))
+            if (!Regex.IsMatch(password, "[<,>,@,/,!,#,%,&,),€,(,?,;,\\,[,\\],{,}]"))
                 sb.Append("Password should contain special chars" + Environment.NewLine);
             return sb.ToString();
         }
@@ -168,6 +168,7 @@ namespace ShopAPI.Controllers
                 
             
         }
+
         [Authorize]
         [HttpGet]
 
@@ -175,6 +176,7 @@ namespace ShopAPI.Controllers
         {
             return Ok(await _itemContext.Users.ToListAsync());
         }
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(TokenApiDTO tokenApiDTO)
         {
@@ -193,7 +195,7 @@ namespace ShopAPI.Controllers
             await _itemContext.SaveChangesAsync();
             return Ok(new TokenApiDTO()
             {
-                AccessToken = accessToken,
+                AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
             });
         }

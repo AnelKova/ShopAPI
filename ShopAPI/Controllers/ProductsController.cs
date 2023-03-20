@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.DependencyResolver;
 using ShopAPI.Context;
 using ShopAPI.Models;
 
@@ -28,11 +29,19 @@ namespace ShopAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
+            var productList= await _context.Products.ToListAsync();
+            if(productList !=null && productList.Count > 0) {
+                productList.ForEach(item =>
+                {
+                      item.ImgPath = GetImageByProduct(item.Code);
+                });
+            }
             return await _context.Products.ToListAsync();
+
         }
 
         // GET: api/Products/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -107,6 +116,7 @@ namespace ShopAPI.Controllers
         {
             return _context.Products.Any(e => e.Id == id);
         }
+        [HttpPost("Uploadimage")]
         public async Task<ActionResult> UploadImage()
         {
             bool Results = false;
@@ -116,9 +126,9 @@ namespace ShopAPI.Controllers
                 foreach (IFormFile source in _uploadedFiles)
                 {
                     string Filename = source.FileName;
-                    string FilePath=GetFilePath(Filename);
+                    string FilePath = GetFilePath(Filename);
 
-                    if(!System.IO.Directory.Exists(FilePath))
+                    if (!System.IO.Directory.Exists(FilePath))
                     {
                         System.IO.Directory.CreateDirectory(FilePath);
                     }
@@ -127,10 +137,10 @@ namespace ShopAPI.Controllers
                     {
                         System.IO.File.Delete(imagepath);
                     }
-                    using(FileStream stream =System.IO.File.Create(imagepath)) 
+                    using (FileStream stream = System.IO.File.Create(imagepath))
                     {
                         await source.CopyToAsync(stream);
-                        Results= true;
+                        Results = true;
                     }
                 }
             }
@@ -139,29 +149,30 @@ namespace ShopAPI.Controllers
 
 
             }
-                return Ok(Results);
-            }
+            return Ok(Results);
+        }
         [NonAction]
         private string GetFilePath(string ProductCode)
         {
-            return _environment.WebRootPath + "\\Uploads\\Product" + ProductCode;
+            return _environment.WebRootPath + "\\Resources\\Images\\" + ProductCode;
         }
+        [NonAction]
         private string GetImageByProduct(string productcode)
         {
             string ImageUrl = string.Empty;
-            string HostUrl = "http://localhost:4200/product/";
+            string HostUrl = "https://localhost:7242/api/Images";
             string filepath = GetFilePath(productcode);
             string ImagePath = filepath + "\\image.png";
             if (!System.IO.File.Exists(ImagePath))
             {
-                ImageUrl = HostUrl + "/uploads/common/noimage.png";
+                ImageUrl = HostUrl;
             }
             else
             {
-                ImageUrl = HostUrl + "/uploads/Product/" + productcode + "/image.png";
+                ImageUrl = HostUrl + "/Resources/Images/" + productcode + "/image.png";
             }
             return ImageUrl;
         }
-        }
+    }
     }
 
